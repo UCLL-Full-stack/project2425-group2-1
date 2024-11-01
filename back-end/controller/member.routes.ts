@@ -1,8 +1,8 @@
 import express, { NextFunction, Request, Response } from 'express';
-import MemberService from '../service/member.service';
+import memberService from '../service/member.service';
 import { Member } from '../model/member';
 import memberDb from '../repository/member.db';
-import memberService from '../service/member.service';
+import { error, profile } from 'console';
 
 const memberRouter = express.Router();
 
@@ -22,12 +22,6 @@ const memberRouter = express.Router();
  *           type: integer
  *           format: int64
  *           description: The auto-generated ID of the member
- *         name:
- *           type: string
- *           description: The first name of the member
- *         surname:
- *           type: string
- *           description: The last name of the member
  *         username:
  *           type: string
  *           description: Unique username for the member
@@ -42,21 +36,22 @@ const memberRouter = express.Router();
  *           description: Member's password (with validation rules)
  *       example:
  *         id: 1
- *         name: John
- *         surname: Doe
  *         username: john_doe
  *         email: johndoe@example.com
  *         phoneNumber: "0475829054"
  *         password: "SecurePassword@1"
  */
-memberRouter.get("/", async (req: Request, res: Response, next:NextFunction) => {
+
+// GET all members
+memberRouter.get("/", async (req: Request, res: Response, next: NextFunction) => {
     try {
-        const members = memberService.getAllMembers();
+        const members = await memberService.getAllMembers();
         res.status(200).json(members);
     } catch (error) {
         next(error);
     }
 });
+
 /**
  * @swagger
  * /members/register:
@@ -81,13 +76,12 @@ memberRouter.get("/", async (req: Request, res: Response, next:NextFunction) => 
  *     security:
  *       - bearerAuth: []
  */
-memberRouter.post('/register', (req: Request, res: Response) => {
+memberRouter.post('/register', async (req: Request, res: Response) => {
     try {
         const newMember = new Member(req.body);
-        MemberService.registerMember(newMember);
+        memberService.registerMember(newMember);
         res.status(201).json(newMember);
     } catch (error) {
-        // Casting error to Error to access the message property
         res.status(400).json({ error: (error as Error).message });
     }
 });
@@ -115,7 +109,7 @@ memberRouter.post('/register', (req: Request, res: Response) => {
  *       404:
  *         description: Member not found
  */
-memberRouter.get('/:id', (req: Request, res: Response) => {
+memberRouter.get('/:id', async (req: Request, res: Response) => {
     const member = memberDb.getMemberById({ id: parseInt(req.params.id, 10) });
     if (member) {
         res.status(200).json(member);
@@ -123,5 +117,24 @@ memberRouter.get('/:id', (req: Request, res: Response) => {
         res.status(404).json({ error: "Member not found" });
     }
 });
+
+
+
+memberRouter.put('/:id/profile', async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        const { id } = req.params;
+        const profileUpdates = req.body;
+        const updatedMember = await memberService.updateProfile(Number(id), profileUpdates);
+
+        if (updatedMember) {
+            res.status(200).json({ message: "Profile updated successfully", profile: updatedMember.getProfile() });
+        } else {
+            res.status(404).json({ error: "Member not found" });
+        }
+    } catch (error) {
+        next(error);
+    }
+});
+
 
 export { memberRouter };
