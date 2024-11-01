@@ -26,7 +26,7 @@ const Members: React.FC = () => {
             <Head>
                 <title>Members</title>
             </Head>
-            <Header />
+            <Header/>
             <main className="d-flex flex-column justify-content-center align-items-center">
                 <h1>Members</h1>
                 <section>

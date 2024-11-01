@@ -17,6 +17,10 @@ const Header: React.FC = () => {
                 <Link href="/members" className='nav-link px-4 fs-5 text-white'>
                     All members
                 </Link>
+                
+                <Link href="/register" className='nav-link px-4 fs-5 text-white'>
+                    Register
+                </Link>
             </nav>
         </header>
     );
