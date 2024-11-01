@@ -9,15 +9,6 @@ const registerMember = (newMember: Member): void => {
         throw new Error("Username is already taken. Please choose another.");
     }
 
-    // Validate phone number (ensure it meets the criteria)
-    // if (!newMember.getPhoneNumber() || !/^(?:(?:\+32|04)\d{8})$/.test(newMember.getPhoneNumber())) {
-    //     throw new Error("Invalid phone number format.");
-    // }
-
-    // // Validate password (ensure it meets the criteria)
-    // if (!newMember.getPassword() || !/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@#$%^&*!&+=])[A-Za-z\d@#$%^&*!&+=]{8,}$/.test(newMember.getPassword())) {
-    //     throw new Error("Password must contain at least 8 characters, including an uppercase letter, lowercase letter, symbol (@#$), and a number.");
-    // }
 
     // Add the member to the repository
     memberRepository.addMember(newMember);

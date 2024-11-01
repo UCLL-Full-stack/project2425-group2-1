@@ -2,7 +2,7 @@ import express, { NextFunction, Request, Response } from 'express';
 import memberService from '../service/member.service';
 import { Member } from '../model/member';
 import memberDb from '../repository/member.db';
-import { error, profile } from 'console';
+import paymentService from '../service/payment.service';
 
 const memberRouter = express.Router();
 
@@ -40,6 +40,51 @@ const memberRouter = express.Router();
  *         email: johndoe@example.com
  *         phoneNumber: "0475829054"
  *         password: "SecurePassword@1"
+ *     Profile:
+ *       type: object
+ *       properties:
+ *         id:
+ *           type: integer
+ *           format: int64
+ *           description: The auto-generated ID of the profile
+ *         name:
+ *           type: string
+ *           description: The member's name
+ *         surname:
+ *           type: string
+ *           description: The member's surname
+ *         height:
+ *           type: number
+ *           description: The member's height in cm
+ *         weight:
+ *           type: number
+ *           description: The member's weight in kg
+ *       example:
+ *         id: 1
+ *         name: John
+ *         surname: Doe
+ *         height: 180
+ *         weight: 75
+ *     Payment:
+ *       type: object
+ *       properties:
+ *         member:
+ *           type: string
+ *           description: Username of the member
+ *         totalPaid:
+ *           type: number
+ *           description: Total amount paid by the member
+ *         status:
+ *           type: string
+ *           description: Current payment status (e.g., Paid, Pending)
+ *         overdueCount:
+ *           type: number
+ *           description: Number of overdue payments
+ *       example:
+ *         member: john_doe
+ *         totalPaid: 500
+ *         status: Paid
+ *         overdueCount: 2
  */
 
 // GET all members
@@ -118,8 +163,41 @@ memberRouter.get('/:id', async (req: Request, res: Response) => {
     }
 });
 
-
-
+/**
+ * @swagger
+ * /members/{id}/profile:
+ *   put:
+ *     summary: Update member profile
+ *     tags: [Members]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         schema:
+ *           type: integer
+ *         required: true
+ *         description: The ID of the member to update
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/Profile'
+ *     responses:
+ *       200:
+ *         description: Profile updated successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   description: Success message
+ *                 profile:
+ *                   $ref: '#/components/schemas/Profile'
+ *       404:
+ *         description: Member not found
+ */
 memberRouter.put('/:id/profile', async (req: Request, res: Response, next: NextFunction) => {
     try {
         const { id } = req.params;
@@ -136,5 +214,67 @@ memberRouter.put('/:id/profile', async (req: Request, res: Response, next: NextF
     }
 });
 
+/**
+ * @swagger
+ * /members/payments/status:
+ *   get:
+ *     summary: Get payment status for all members
+ *     tags: [Payments]
+ *     responses:
+ *       200:
+ *         description: Payment status retrieved successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 $ref: '#/components/schemas/Payment'
+ */
+memberRouter.get('/payments/status',  async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        const paymentStatus = await paymentService.getPaymentStatus();
+        res.status(200).json(paymentStatus);
+    } catch (error) {
+        next(error);
+    }
+});
+
+/**
+ * @swagger
+ * /members/payments/report:
+ *   get:
+ *     summary: Generate a financial report for all members
+ *     tags: [Payments]
+ *     responses:
+ *       200:
+ *         description: Financial report generated successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 type: object
+ *                 properties:
+ *                   member:
+ *                     type: string
+ *                     description: Username of the member
+ *                   totalPaid:
+ *                     type: number
+ *                     description: Total amount paid by the member
+ *                   totalPayments:
+ *                     type: number
+ *                     description: Total number of payments made by the member
+ *                   totalOverdue:
+ *                     type: number
+ *                     description: Total number of overdue payments
+ */
+memberRouter.get('/payments/report', async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        const report = await paymentService.generateFinancialReport();
+        res.status(200).json(report);
+    } catch (error) {
+        next(error);
+    }
+});
 
 export { memberRouter };
