@@ -12,9 +12,13 @@ const Register: React.FC = () => {
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [error, setError] = useState<string | null>(null);
+  const [success, setSuccess] = useState<string | null>(null);
 
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
+    setError(null);
+    setSuccess(null);
+
     if (password !== confirmPassword) {
       setError("Passwords do not match");
       return;
@@ -24,9 +28,14 @@ const Register: React.FC = () => {
       const newMember = { username, email, phoneNumber, password };
       const response = await MemberService.registerMember(newMember);
       console.log("Registration successful:", response);
-      // Redirect or show success message
+      setSuccess("Registration successful! Redirecting to dashboard...");
+      // Optionally, redirect the user after a delay
+      setTimeout(() => {
+        // Redirect to dashboard or login page
+        window.location.href = '/dashboard'; // Change to your desired route
+      }, 2000);
     } catch (error) {
-      setError((error as any).message);
+      setError((error as Error).message);
       console.error("Registration failed:", error);
     }
   };
@@ -52,6 +61,11 @@ const Register: React.FC = () => {
           {error && (
             <Typography color="error" sx={{ mt: 2 }}>
               {error}
+            </Typography>
+          )}
+          {success && (
+            <Typography color="primary" sx={{ mt: 2 }}>
+              {success}
             </Typography>
           )}
           <Box component="form" onSubmit={handleSubmit} sx={{ mt: 3 }}>

@@ -28,14 +28,14 @@ const MembersOverview: React.FC<Props> = ({ members }) => {
                         <tr key={member.id}>
                         <td>{member.id}</td>
                         <td>{member.username}</td>
-                        <td>{member.profile.name}</td>
-                        <td>{member.profile.surname}</td>
+                        <td>{member.profile?.name || 'N/A'}</td>
+                        <td>{member.profile?.surname || 'N/A'}</td>
                         <td>{member.email}</td>
                         <td>{member.phoneNumber}</td>
                         <td>{member.password}</td>
-                        <td>{member.profile.height}</td>
-                        <td>{member.profile.weight}</td>
-                        </tr>
+                        <td>{member.profile?.height || 'N/A'}</td>
+                        <td>{member.profile?.weight || 'N/A'}</td>
+                      </tr>
                     ))}
                 </tbody>
             </table>
