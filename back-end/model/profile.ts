@@ -48,4 +48,13 @@ export class Profile {
     setWeight(weight: number): void {
         this.weight = weight;
     }
+    
+    equals(profile: Profile): boolean {
+        return (
+            this.name === profile.getName() &&
+            this.surname === profile.getSurname() &&
+            this.height === profile.getHeight() &&
+            this.weight === profile.getWeight()
+        );
+    }
 }
