@@ -41,7 +41,10 @@ const members: Member[] = [
     }),
 ];
 
-// Function definitions remain the same...
+const getNextId = (): number => {
+    const ids = members.map(member => member.getId() || 0);
+    return ids.length > 0 ? Math.max(...ids) + 1 : 1;
+};
 
 const getAllMembers = (): Member[] => members;
 
@@ -59,6 +62,7 @@ const isUsernameUnique = (username: string): boolean => {
 
 const addMember = (newMember: Member): void => {
     if (isUsernameUnique(newMember.getUsername())) {
+        newMember.setId(getNextId()); // Assign the next available ID
         members.push(newMember);
     } else {
         throw new Error(`Username ${newMember.getUsername()} is already taken.`);

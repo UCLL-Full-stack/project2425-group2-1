@@ -22,7 +22,7 @@ export class Member {
           payment?: Payment[]; // Use singular form
       }) {
 
-        if (!this.validatePhoneNumber(phoneNumber)) {
+      if (!this.validatePhoneNumber(phoneNumber)) {
           throw new Error("Invalid phone number format. It should start with +32 or 04 and have 10 digits.");
       }
 
@@ -43,6 +43,9 @@ export class Member {
     return this.id;
   }
 
+  setId(id: number): void {
+    this.id = id;
+  }
 
   getUsername(): string {
     return this.username;
@@ -60,19 +63,17 @@ export class Member {
     return this.password;
   }
 
-  getProfile() : Profile {
+  getProfile(): Profile {
     return this.profile;
   } 
+
   addPayment(payment: Payment): void {
     this.payment.push(payment);
-}
+  }
 
-// Method to get all payments
-getPayments(): Payment[] {
+  getPayments(): Payment[] {
     return this.payment;
-}
-
-
+  }
 
   equals(member: Member): boolean {
     return (
