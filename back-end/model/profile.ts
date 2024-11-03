@@ -33,28 +33,19 @@ export class Profile {
         return this.weight;
     }
 
-    setName(name: string) {
+    setName(name: string): void {
         this.name = name;
     }
 
-    setSurname(surname: string) {
+    setSurname(surname: string): void {
         this.surname = surname;
     }
 
-    setHeight(height: number) {
+    setHeight(height: number): void {
         this.height = height;
     }
 
-    setWeight(weight: number) {
+    setWeight(weight: number): void {
         this.weight = weight;
-    }
-
-    equals(profile: Profile): boolean {
-        return (
-            this.name === profile.getName() &&
-            this.surname === profile.getSurname() &&
-            this.height === profile.getHeight() &&
-            this.weight === profile.getWeight()
-        );
     }
 }

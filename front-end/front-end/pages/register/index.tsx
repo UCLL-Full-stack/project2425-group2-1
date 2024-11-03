@@ -1,16 +1,16 @@
-// Register.tsx
 import React, { useState } from 'react';
-import { TextField, Button, Container, Typography, Box } from '@mui/material';
+import { TextField, Button, Container, Box, Typography } from '@mui/material';
 import Head from 'next/head';
 import Header from '@/components/header';
 import MemberService from '@/services/MemberService';
 
-const Register: React.FC = () => {
+const RegisterPage = () => {
   const [username, setUsername] = useState('');
   const [email, setEmail] = useState('');
   const [phoneNumber, setPhoneNumber] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
+  const [profile, setProfile] = useState({ name: '', surname: '' });
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
 
@@ -25,14 +25,21 @@ const Register: React.FC = () => {
     }
 
     try {
-      const newMember = { username, email, phoneNumber, password };
+      const newMember = { 
+        username, 
+        email, 
+        phoneNumber, 
+        password, 
+        profile: { 
+          name: profile.name, 
+          surname: profile.surname 
+        } 
+      };
       const response = await MemberService.registerMember(newMember);
       console.log("Registration successful:", response);
       setSuccess("Registration successful! Redirecting to dashboard...");
-      // Optionally, redirect the user after a delay
       setTimeout(() => {
-        // Redirect to dashboard or login page
-        window.location.href = '/dashboard'; // Change to your desired route
+        window.location.href = `/dashboard/${response.id}`;
       }, 2000);
     } catch (error) {
       setError((error as Error).message);
@@ -49,26 +56,40 @@ const Register: React.FC = () => {
       <Container maxWidth="sm">
         <Box
           sx={{
+            marginTop: 8,
             display: 'flex',
             flexDirection: 'column',
             alignItems: 'center',
-            mt: 8,
           }}
         >
           <Typography component="h1" variant="h5">
             Register
           </Typography>
-          {error && (
-            <Typography color="error" sx={{ mt: 2 }}>
-              {error}
-            </Typography>
-          )}
-          {success && (
-            <Typography color="primary" sx={{ mt: 2 }}>
-              {success}
-            </Typography>
-          )}
-          <Box component="form" onSubmit={handleSubmit} sx={{ mt: 3 }}>
+          <Box component="form" onSubmit={handleSubmit} sx={{ mt: 1 }}>
+            <TextField
+              variant="outlined"
+              margin="normal"
+              required
+              fullWidth
+              id="name"
+              label="Name"
+              name="name"
+              autoComplete="name"
+              value={profile.name}
+              onChange={(e) => setProfile({ ...profile, name: e.target.value })}
+            />
+            <TextField
+              variant="outlined"
+              margin="normal"
+              required
+              fullWidth
+              id="surname"
+              label="Surname"
+              name="surname"
+              autoComplete="surname"
+              value={profile.surname}
+              onChange={(e) => setProfile({ ...profile, surname: e.target.value })}
+            />
             <TextField
               variant="outlined"
               margin="normal"
@@ -111,10 +132,10 @@ const Register: React.FC = () => {
               margin="normal"
               required
               fullWidth
-              name="password"
-              label="Password"
-              type="password"
               id="password"
+              label="Password"
+              name="password"
+              type="password"
               autoComplete="current-password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
@@ -124,14 +145,16 @@ const Register: React.FC = () => {
               margin="normal"
               required
               fullWidth
-              name="confirmPassword"
-              label="Confirm Password"
-              type="password"
               id="confirmPassword"
+              label="Confirm Password"
+              name="confirmPassword"
+              type="password"
               autoComplete="current-password"
               value={confirmPassword}
               onChange={(e) => setConfirmPassword(e.target.value)}
             />
+            {error && <Typography color="error">{error}</Typography>}
+            {success && <Typography color="primary">{success}</Typography>}
             <Button
               type="submit"
               fullWidth
@@ -148,4 +171,4 @@ const Register: React.FC = () => {
   );
 };
 
-export default Register;
+export default RegisterPage;

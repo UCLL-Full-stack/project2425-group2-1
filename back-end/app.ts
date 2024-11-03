@@ -1,7 +1,6 @@
 import * as dotenv from 'dotenv';
 import express from 'express';
 import cors from 'cors';
-import * as bodyParser from 'body-parser';
 import swaggerJSDoc from 'swagger-jsdoc';
 import swaggerUi from 'swagger-ui-express';
 
@@ -11,11 +10,13 @@ const app = express();
 dotenv.config();
 const port = process.env.APP_PORT || 3001;
 
-app.use(cors({origin: "http://localhost:8080"}));
-app.use(bodyParser.json());
+app.use(cors({ origin: "http://localhost:8080" }));
 
-app.use("/members",memberRouter)
+// Middleware to parse JSON request bodies
+app.use(express.json());
 
+// Use the member router
+app.use("/members", memberRouter);
 
 
 app.get('/status', (req, res) => {
@@ -45,8 +46,7 @@ app.use((err: any, req: express.Request, res: express.Response, next: express.Ne
     });
 });
 
-
-app.listen(port || 3001, () => {
+app.listen(port, () => {
     console.log(`Back-end is running on port ${port}.`);
 });
 

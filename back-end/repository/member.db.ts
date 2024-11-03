@@ -48,13 +48,7 @@ const getNextId = (): number => {
 
 const getAllMembers = (): Member[] => members;
 
-const getMemberById = ({ id }: { id: number }): Member | null => {
-    const member = members.find((member) => member.getId() === id);
-    if (!member) {
-        throw new Error(`Member with id ${id} does not exist.`);
-    }
-    return member;
-};
+
 
 const isUsernameUnique = (username: string): boolean => {
     return !members.some((member) => member.getUsername() === username);
@@ -69,13 +63,20 @@ const addMember = (newMember: Member): void => {
     }
 };
 
+const getMemberById = ({ id }: { id: number }): Member | undefined => {
+  const member = members.find(member => member.getId() === id);
+  console.log(`getMemberById: Found member with ID ${id}:`, member); // Log the member for verification
+  return member;
+};
+
 const updateMember = (updatedMember: Member): void => {
-    const index = members.findIndex((member) => member.getId() === updatedMember.getId());
-    if (index !== -1) {
-        members[index] = updatedMember; // Replace the existing member with the updated one
-    } else {
-        throw new Error(`Member with id ${updatedMember.getId()} does not exist.`);
-    }
+  const index = members.findIndex(member => member.getId() === updatedMember.getId());
+  if (index !== -1) {
+    members[index] = updatedMember;
+    console.log(`updateMember: Updated member with ID ${updatedMember.getId()}`); // Log the update for verification
+  } else {
+    console.error(`updateMember: Member with ID ${updatedMember.getId()} not found`);
+  }
 };
 
 // Exporting functions for use in other modules

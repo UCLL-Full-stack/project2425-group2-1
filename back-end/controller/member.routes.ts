@@ -2,9 +2,11 @@ import express, { NextFunction, Request, Response } from 'express';
 import memberService from '../service/member.service';
 import { Member } from '../model/member';
 import memberDb from '../repository/member.db';
+import { Profile } from '../model/profile'; // Adjust the import path as necessary
 import paymentService from '../service/payment.service';
 
 const memberRouter = express.Router();
+
 
 /**
  * @swagger
@@ -108,24 +110,51 @@ memberRouter.get("/", async (req: Request, res: Response, next: NextFunction) =>
  *       content:
  *         application/json:
  *           schema:
- *             $ref: '#/components/schemas/Member'
+ *             type: object
+ *             properties:
+ *               username:
+ *                 type: string
+ *               email:
+ *                 type: string
+ *               phoneNumber:
+ *                 type: string
+ *               password:
+ *                 type: string
+ *               profile:
+ *                 type: object
+ *                 properties:
+ *                   name:
+ *                     type: string
+ *                   surname:
+ *                     type: string
  *     responses:
  *       201:
  *         description: Member registered successfully
  *         content:
  *           application/json:
  *             schema:
- *               $ref: '#/components/schemas/Member'
+ *               type: object
+ *               properties:
+ *                 id:
+ *                   type: integer
  *       400:
- *         description: Invalid input or username already exists
- *     security:
- *       - bearerAuth: []
+ *         description: Bad request
+ *       405:
+ *         description: Method not allowed
  */
 memberRouter.post('/register', async (req: Request, res: Response) => {
     try {
-        const newMember = new Member(req.body);
-        memberService.registerMember(newMember);
-        res.status(201).json(newMember);
+        const { username, email, phoneNumber, password, profile } = req.body;
+        const newMember = new Member({
+            username,
+            email,
+            phoneNumber,
+            password,
+            profile: new Profile(profile),
+        });
+
+        const memberId = memberService.registerMember(newMember);
+        res.status(201).json({ id: memberId });
     } catch (error) {
         res.status(400).json({ error: (error as Error).message });
     }
@@ -198,19 +227,23 @@ memberRouter.get('/:id', async (req: Request, res: Response) => {
  *       404:
  *         description: Member not found
  */
-memberRouter.put('/:id/profile', async (req: Request, res: Response, next: NextFunction) => {
-    try {
-        const { id } = req.params;
-        const profileUpdates = req.body;
-        const updatedMember = await memberService.updateProfile(Number(id), profileUpdates);
 
-        if (updatedMember) {
-            res.status(200).json({ message: "Profile updated successfully", profile: updatedMember.getProfile() });
-        } else {
-            res.status(404).json({ error: "Member not found" });
-        }
+memberRouter.put('/members/:id/profile', async (req: Request, res: Response, next: NextFunction) => {
+    console.log(`Received request to update profile for member ID: ${req.params.id}`);
+    console.log('Request body:', req.body); // Log the request body for verification
+    try {
+      const { id } = req.params;
+      const profileUpdates = req.body;
+      const updatedMember = await memberService.updateProfile(Number(id), profileUpdates);
+  
+      if (updatedMember) {
+        res.status(200).json({ message: "Profile updated successfully", profile: updatedMember.getProfile() });
+      } else {
+        res.status(404).json({ error: "Member not found" });
+      }
     } catch (error) {
-        next(error);
+      console.error('Error updating profile:', error);
+      res.status(500).json({ error: 'Internal Server Error' });
     }
 });
 
