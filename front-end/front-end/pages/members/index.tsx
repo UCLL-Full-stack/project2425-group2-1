@@ -7,20 +7,21 @@ import MemberService from "@/services/MemberService";
 
 const Members: React.FC = () => {
     const [members, setMembers] = useState<Array<Member>>([]);
+    useEffect(() => {
+        getMembers();
+    }, []);
+
 
     const getMembers = async () => {
         try {
-            const memberz = await MemberService.getAllMembers();
+            const memberz = await MemberService.getAllMembers(); 
             setMembers(memberz);
         } catch (error) {
             console.error('Failed to fetch members:', error);
         }
     }
 
-    useEffect(() => {
-        getMembers();
-    }, []);
-
+ 
     return (
         <>
             <Head>
@@ -30,11 +31,9 @@ const Members: React.FC = () => {
             <main className="d-flex flex-column justify-content-center align-items-center">
                 <h1>Members</h1>
                 <section>
-                    {members.length > 0 ? (
+                    {members && (
                         <Membersoverview members={members} />
-                    ) : (
-                        <p>No members found.</p>
-                    )}
+                    ) }
                 </section>
             </main>
         </>

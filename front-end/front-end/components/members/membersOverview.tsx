@@ -5,7 +5,7 @@ type Props = {
   members: Array<Member>;
 };
 
-const MembersOverview: React.FC<Props> = ({ members }) => {
+const MembersOverview: React.FC<Props> = ({ members } : Props) => {
   return (
     <>
         {members && (
@@ -24,7 +24,7 @@ const MembersOverview: React.FC<Props> = ({ members }) => {
                     </tr>
                 </thead>
                 <tbody>
-                    {members.map((member) => (
+                    {members.map((member,index) => (
                         <tr key={member.id}>
                         <td>{member.id}</td>
                         <td>{member.username}</td>
