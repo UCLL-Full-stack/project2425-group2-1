@@ -1,4 +1,5 @@
 // index.ts
+// Role = member | trainees | admin
 
  type MemberInput = {
     username: string;
