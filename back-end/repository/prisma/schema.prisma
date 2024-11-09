@@ -1,0 +1,37 @@
+generator client {
+    provider = "prisma-client-js"
+}
+
+datasource db{
+    provider = "postgresql"
+    url = env("DATABASE_URL")
+}
+
+model Member{
+    id Int @id @default(autoincrement())
+    username String 
+    email String  @unique
+    password String 
+    profileId Int @unique
+    profile Profile @relation(fields : [profileId], references: [id])
+    payments Payment[]
+}
+model Profile{
+    id Int @id  @default(autoincrement())
+    name String 
+    surname String 
+    height Int
+    weight Int
+    member Member? @relation //here the "?" notation creats an optinal one-to-one so profile can have 0 or one member
+}
+
+model Payment{
+    id Int @id @default(autoincrement())
+    amount Float
+    date DateTime 
+    dueDate DateTime
+    paymentStatus Boolean
+    memberId     Int
+    member       Member   @relation(fields: [memberId], references: [id])
+}
+
