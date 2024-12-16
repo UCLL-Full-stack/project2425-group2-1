@@ -7,7 +7,6 @@ import paymentService from '../service/payment.service';
 
 const memberRouter = express.Router();
 
-
 /**
  * @swagger
  * components:
@@ -90,7 +89,7 @@ const memberRouter = express.Router();
  */
 
 // GET all members
-memberRouter.get("/", async (req: Request, res: Response, next: NextFunction) => {
+memberRouter.get('/', async (req: Request, res: Response, next: NextFunction) => {
     try {
         const members = await memberService.getAllMembers();
         res.status(200).json(members);
@@ -153,13 +152,12 @@ memberRouter.post('/register', async (req: Request, res: Response) => {
             profile: new Profile(profile),
         });
 
-        const memberId = memberService.registerMember(newMember);
+        const memberId = await memberService.registerMember(newMember);
         res.status(201).json({ id: memberId });
     } catch (error) {
         res.status(400).json({ error: (error as Error).message });
     }
 });
-
 /**
  * @swagger
  * /members/{id}:
@@ -184,11 +182,15 @@ memberRouter.post('/register', async (req: Request, res: Response) => {
  *         description: Member not found
  */
 memberRouter.get('/:id', async (req: Request, res: Response) => {
-    const member = memberDb.getMemberById({ id: parseInt(req.params.id, 10) });
-    if (member) {
+    try {
+        const id = parseInt(req.params.id, 10);
+        const member = await memberService.getMemberById(id);
+        if (!member) {
+            return res.status(404).json({ error: `Member with id ${id} does not exist.` });
+        }
         res.status(200).json(member);
-    } else {
-        res.status(404).json({ error: "Member not found" });
+    } catch (error) {
+        res.status(500).json({ error: (error as Error).message });
     }
 });
 
@@ -228,24 +230,30 @@ memberRouter.get('/:id', async (req: Request, res: Response) => {
  *         description: Member not found
  */
 
-memberRouter.put('/members/:id/profile', async (req: Request, res: Response, next: NextFunction) => {
-    console.log(`Received request to update profile for member ID: ${req.params.id}`);
-    console.log('Request body:', req.body); // Log the request body for verification
-    try {
-      const { id } = req.params;
-      const profileUpdates = req.body;
-      const updatedMember = await memberService.updateProfile(Number(id), profileUpdates);
-  
-      if (updatedMember) {
-        res.status(200).json({ message: "Profile updated successfully", profile: updatedMember.getProfile() });
-      } else {
-        res.status(404).json({ error: "Member not found" });
-      }
-    } catch (error) {
-      console.error('Error updating profile:', error);
-      res.status(500).json({ error: 'Internal Server Error' });
+memberRouter.put(
+    '/members/:id/profile',
+    async (req: Request, res: Response, next: NextFunction) => {
+        console.log(`Received request to update profile for member ID: ${req.params.id}`);
+        console.log('Request body:', req.body); // Log the request body for verification
+        try {
+            const { id } = req.params;
+            const profileUpdates = req.body;
+            const updatedMember = await memberService.updateProfile(Number(id), profileUpdates);
+
+            if (updatedMember) {
+                res.status(200).json({
+                    message: 'Profile updated successfully',
+                    profile: updatedMember.getProfile(),
+                });
+            } else {
+                res.status(404).json({ error: 'Member not found' });
+            }
+        } catch (error) {
+            console.error('Error updating profile:', error);
+            res.status(500).json({ error: 'Internal Server Error' });
+        }
     }
-});
+);
 
 /**
  * @swagger
@@ -263,7 +271,7 @@ memberRouter.put('/members/:id/profile', async (req: Request, res: Response, nex
  *               items:
  *                 $ref: '#/components/schemas/Payment'
  */
-memberRouter.get('/payments/status',  async (req: Request, res: Response, next: NextFunction) => {
+memberRouter.get('/payments/status', async (req: Request, res: Response, next: NextFunction) => {
     try {
         const paymentStatus = await paymentService.getPaymentStatus();
         res.status(200).json(paymentStatus);

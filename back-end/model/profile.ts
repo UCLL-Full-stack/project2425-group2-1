@@ -1,11 +1,18 @@
+import { Profile as ProfilePrisma } from '@prisma/client';
 export class Profile {
-    private id?: number;
-    private name: string;
-    private surname: string;
-    private height: number; // height in cm
-    private weight: number; // weight in kg
+    public id?: number;
+    public name: string;
+    public surname: string;
+    public height: number; // height in cm
+    public weight: number; // weight in kg
 
-    constructor(profile: { id?: number; name: string; surname: string; height: number; weight: number; }) {
+    constructor(profile: {
+        id?: number;
+        name: string;
+        surname: string;
+        height: number;
+        weight: number;
+    }) {
         this.id = profile.id;
         this.name = profile.name;
         this.surname = profile.surname;
@@ -48,7 +55,7 @@ export class Profile {
     setWeight(weight: number): void {
         this.weight = weight;
     }
-    
+
     equals(profile: Profile): boolean {
         return (
             this.name === profile.getName() &&
@@ -56,5 +63,15 @@ export class Profile {
             this.height === profile.getHeight() &&
             this.weight === profile.getWeight()
         );
+    }
+
+    static from({ id, name, surname, height, weight }: ProfilePrisma): Profile {
+        return new Profile({
+            id,
+            name,
+            surname,
+            height,
+            weight,
+        });
     }
 }

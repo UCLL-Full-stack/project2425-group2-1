@@ -1,24 +1,32 @@
-export class Payment {
-    private id?: number;                // Optional id
-    private amount: number;             // Amount paid
-    private date: Date;                 // Payment date
-    private dueDate: Date;              // Due date for the payment
-    private paymentStatus: boolean;      // Payment status (true if paid, false if pending)
+import { Payment as PaymentPrisma } from '@prisma/client';
 
-    // Constructor to initialize the Payment object
-    constructor(payment: { 
-        amount: number, 
-        date: Date, 
-        dueDate: Date, 
-        paymentStatus: boolean 
+export class Payment {
+    public id?: number;
+    public amount: number;
+    public date: Date;
+    public dueDate: Date;
+    public paymentStatus: boolean;
+
+    constructor({
+        id,
+        amount,
+        date,
+        dueDate,
+        paymentStatus,
+    }: {
+        id?: number;
+        amount: number;
+        date: Date;
+        dueDate: Date;
+        paymentStatus: boolean;
     }) {
-        this.amount = payment.amount;
-        this.date = payment.date;
-        this.dueDate = payment.dueDate;
-        this.paymentStatus = payment.paymentStatus;
+        this.id = id;
+        this.amount = amount;
+        this.date = date;
+        this.dueDate = dueDate;
+        this.paymentStatus = paymentStatus;
     }
 
-    // Getter methods for accessing private properties
     getId(): number | undefined {
         return this.id;
     }
@@ -39,13 +47,10 @@ export class Payment {
         return this.paymentStatus;
     }
 
-    // Method to check if payment is overdue
     isOverdue(): boolean {
-        // A payment is overdue if it's not paid and the due date has passed
         return !this.paymentStatus && new Date() > this.dueDate;
     }
 
-    // Equals method to compare two Payment objects
     equals(payment: Payment): boolean {
         return (
             this.amount === payment.getAmount() &&
@@ -53,5 +58,21 @@ export class Payment {
             this.dueDate.getTime() === payment.getDueDate().getTime() &&
             this.paymentStatus === payment.getPaymentStatus()
         );
+    }
+
+    static from({
+        id,
+        amount,
+        date,
+        dueDate,
+        paymentStatus,
+    }: PaymentPrisma): Payment {
+        return new Payment({
+            id,
+            amount,
+            date,
+            dueDate,
+            paymentStatus,
+        });
     }
 }
