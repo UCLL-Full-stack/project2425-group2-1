@@ -1,38 +1,50 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
 }
 
-generator client {
-  provider = "prisma-client-js"
-}
-
 model Member {
-  id          Int      @id @default(autoincrement())
-  username    String   @unique
-  email       String   @unique
-  phoneNumber String   @unique
-  password    String
-  profile     Profile  @relation(fields: [profileId], references: [id], onDelete: Cascade)
-  profileId   Int
-  payments    Payment[]
+  id           Int         @id @default(autoincrement())
+  username     String      @unique
+  email        String      @unique
+  phoneNumber  String      @unique
+  password     String
+  profileId    Int?        @unique
+  membershipId Int?        @unique
+  membership   Membership? @relation(fields: [membershipId], references: [id])
+  profile      Profile?    @relation(fields: [profileId], references: [id], onDelete: Cascade)
+  payments     Payment[]
 }
 
 model Profile {
-  id        Int      @id @default(autoincrement())
-  name      String
-  surname   String
-  height    Float    // height in cm
-  weight    Float    // weight in kg
-  members   Member[]
+  id       Int     @id @default(autoincrement())
+  name     String
+  surname  String
+  height   Float
+  weight   Float
+  memberId Int?    @unique
+  member   Member?
+}
+
+model Membership {
+  id              Int      @id @default(autoincrement())
+  start_date      DateTime @default(now())
+  end_date        DateTime
+  membership_type String
+  memberId        Int?     @unique
+  member          Member?
 }
 
 model Payment {
-  id             Int      @id @default(autoincrement())
-  amount         Float
-  date           DateTime @default(now())
-  dueDate        DateTime
-  paymentStatus  Boolean  @default(false)
-  member         Member   @relation(fields: [memberId], references: [id], onDelete: Cascade)
-  memberId       Int
+  id            Int      @id @default(autoincrement())
+  amount        Float
+  date          DateTime @default(now())
+  dueDate       DateTime
+  paymentStatus Boolean  @default(false)
+  memberId      Int
+  member        Member   @relation(fields: [memberId], references: [id], onDelete: Cascade)
 }

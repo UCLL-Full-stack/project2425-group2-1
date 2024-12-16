@@ -5,6 +5,8 @@ import swaggerJSDoc from 'swagger-jsdoc';
 import swaggerUi from 'swagger-ui-express';
 
 import { memberRouter } from './controller/member.routes';
+import { membershipRouter } from './controller/membership.routes';
+
 
 const app = express();
 dotenv.config();
@@ -17,6 +19,7 @@ app.use(express.json());
 
 // Use the member router
 app.use("/members", memberRouter);
+app.use("/memberships", membershipRouter);
 
 
 app.get('/status', (req, res) => {

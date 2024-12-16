@@ -7,6 +7,7 @@ const main = async () => {
     await prisma.payment.deleteMany();
     await prisma.member.deleteMany(); // Delete members first to avoid foreign key constraint issues
     await prisma.profile.deleteMany(); // Then delete profiles
+    await prisma.membership.deleteMany(); // Then delete memberships
 
     // Create members with profiles and payments
     const member1 = await prisma.member.create({
@@ -39,6 +40,13 @@ const main = async () => {
                     },
                 ],
             },
+            membership: {
+                create: {
+                    start_date: new Date('2024-01-01'),
+                    end_date: new Date('2024-12-31'),
+                    membership_type: 'Yearly',
+                },
+            },
         },
     });
 
@@ -65,6 +73,13 @@ const main = async () => {
                         paymentStatus: true,
                     },
                 ],
+            },
+            membership: {
+                create: {
+                    start_date: new Date('2024-03-01'),
+                    end_date: new Date('2024-05-31'),
+                    membership_type: 'Quarterly',
+                },
             },
         },
     });
