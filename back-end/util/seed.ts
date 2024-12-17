@@ -1,4 +1,6 @@
+// seed.ts
 import { PrismaClient } from '@prisma/client';
+import bcrypt from 'bcrypt';
 
 const prisma = new PrismaClient();
 
@@ -8,6 +10,8 @@ const main = async () => {
     await prisma.member.deleteMany(); // Delete members first to avoid foreign key constraint issues
     await prisma.profile.deleteMany(); // Then delete profiles
     await prisma.membership.deleteMany(); // Then delete memberships
+    await prisma.trainer.deleteMany(); // Delete trainers
+    await prisma.attendance.deleteMany(); // Delete attendances
 
     // Create members with profiles and payments
     const member1 = await prisma.member.create({
@@ -15,7 +19,7 @@ const main = async () => {
             username: 'XxX_ibench225_XxX',
             email: 'randomahhemail@gmail.com',
             phoneNumber: '0475829054',
-            password: 'H4j1u421@1', // Plain text password for seeding
+            password: await bcrypt.hash('H4j1u421@1', 10), // Hash password for seeding
             profile: {
                 create: {
                     name: 'John',
@@ -55,7 +59,7 @@ const main = async () => {
             username: 'WifelessWarrior',
             email: 'idk@gmail.com',
             phoneNumber: '0403892754',
-            password: 'Ba21#@Password2', // Plain text password for seeding
+            password: await bcrypt.hash('Ba21#@Password2', 10), // Hash password for seeding
             profile: {
                 create: {
                     name: 'Bla',
@@ -84,7 +88,56 @@ const main = async () => {
         },
     });
 
+    // Create trainers
+    const trainer1 = await prisma.trainer.create({
+        data: {
+            name: 'John Doe',
+            availability: 'Monday, Wednesday, Friday',
+            language_known: 'English, Spanish',
+        },
+    });
+
+    const trainer2 = await prisma.trainer.create({
+        data: {
+            name: 'Jane Smith',
+            availability: 'Tuesday, Thursday, Saturday',
+            language_known: 'English, French',
+        },
+    });
+
+    // Create attendances
+    const attendance1 = await prisma.attendance.create({
+        data: {
+            attendance_tracking: 'Attended session on 2024-01-15',
+            
+            memberId: [member1.id],
+            members: {
+                connect: [{ id: member1.id }],
+            },
+            trainerId: [trainer1.id],
+            trainers: {
+                connect: [{ id: trainer1.id }],
+            },
+        },
+    });
+
+    const attendance2 = await prisma.attendance.create({
+        data: {
+            attendance_tracking: 'Attended session on 2024-01-16',
+                memberId: [member2.id],
+            members: {
+                connect: [{ id: member2.id }],
+            },
+            trainerId: [trainer2.id],
+            trainers: {
+                connect: [{ id: trainer2.id }],
+            },
+        },
+    });
+
     console.log('Seeded members:', member1, member2);
+    console.log('Seeded trainers:', trainer1, trainer2);
+    console.log('Seeded attendances:', attendance1, attendance2);
 };
 
 main()

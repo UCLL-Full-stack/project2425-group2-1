@@ -1,11 +1,11 @@
 import { Membership as MembershipPrisma } from '@prisma/client';
 
 export class Membership {
-    public id?: number; // Optional id
-    public start_date: Date;
-    public end_date: Date;
-    public membership_type: string;
-    public memberId?: number; // Optional memberId
+    private id?: number; // Optional id
+    private start_date: Date;
+    private end_date: Date;
+    private membership_type: string;
+    private memberId?: number; // Optional memberId
 
     // Constructor to initialize the Membership object
     constructor({

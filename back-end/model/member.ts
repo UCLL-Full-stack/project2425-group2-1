@@ -7,13 +7,13 @@ import {
 } from '@prisma/client';
 
 export class Member {
-    public id?: number; // Optional id
-    public username: string;
-    public email: string;
-    public phoneNumber: string;
-    public password: string;
-    public profile: Profile;
-    public payments: Payment[]; // Use plural form
+    private id?: number; // Optional id
+    private username: string;
+    private email: string;
+    private phoneNumber: string;
+    private password: string;
+    private profile: Profile;
+    private payments: Payment[]; // Use plural form
 
     // Constructor to initialize the Member object
     constructor({
@@ -98,16 +98,16 @@ export class Member {
         );
     }
 
-    // private validatePhoneNumber(phoneNumber: string): boolean {
-    //     const phoneRegex = /^(?:\+32|04)\d{8}$/;
-    //     return phoneRegex.test(phoneNumber);
-    // }
+    private validatePhoneNumber(phoneNumber: string): boolean {
+        const phoneRegex = /^(?:\+32|04)\d{8}$/;
+        return phoneRegex.test(phoneNumber);
+    }
 
-    // private validatePassword(password: string): boolean {
-    //     const passwordRegex =
-    //         /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@#$%^&*!&+=])[A-Za-z\d@#$%^&*!&+=]{8,}$/;
-    //     return passwordRegex.test(password);
-    // }
+    private validatePassword(password: string): boolean {
+        const passwordRegex =
+            /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@#$%^&*!&+=])[A-Za-z\d@#$%^&*!&+=]{8,}$/;
+        return passwordRegex.test(password);
+    }
 
     static from({
         id,

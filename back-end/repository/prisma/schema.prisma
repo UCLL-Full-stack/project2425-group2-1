@@ -18,6 +18,7 @@ model Member {
   membership   Membership? @relation(fields: [membershipId], references: [id])
   profile      Profile?    @relation(fields: [profileId], references: [id], onDelete: Cascade)
   payments     Payment[]
+  attendances  Attendance[]
 }
 
 model Profile {
@@ -47,4 +48,21 @@ model Payment {
   paymentStatus Boolean  @default(false)
   memberId      Int
   member        Member   @relation(fields: [memberId], references: [id], onDelete: Cascade)
+}
+
+model Trainer {
+  id             Int           @id @default(autoincrement())
+  name           String        @unique
+  availability   String
+  language_known String
+  attendances    Attendance[]
+}
+
+model Attendance {
+  id                 Int           @id @default(autoincrement())
+  attendance_tracking String
+  memberId           Int[]
+  members            Member[]
+  trainerId          Int[]
+  trainers           Trainer[]
 }

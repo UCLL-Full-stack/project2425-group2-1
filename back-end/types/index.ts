@@ -22,11 +22,6 @@ type MemberShipInput = {
     endDate: Date;
     role: Role;
 };
-type UpdateMMembershipInput = {
-    memberid?: number;
-    startDate: Date;
-    endDate: Date;
-    membershipType?: string;
-};
+
 
 export { MemberInput, ProfileInput, Role, MemberShipInput };
