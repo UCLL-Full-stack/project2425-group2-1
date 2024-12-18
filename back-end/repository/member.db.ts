@@ -10,6 +10,7 @@ const getAllMembers = async (): Promise<Member[]> => {
             include: {
                 profile: true,
                 payments: true,
+                membership: true, // Correct to 'membership' (singular)
             },
         });
         return membersPrisma.map((memberPrisma) => Member.from(memberPrisma));
@@ -20,8 +21,8 @@ const getAllMembers = async (): Promise<Member[]> => {
 };
 
 const createMember = async (memberData: MemberInput): Promise<Member> => {
-    const { username, email, phoneNumber, password, profile, payment } = memberData;
-    
+    const { username, email, phoneNumber, password, profile, payment, membership } = memberData;
+
     try {
         const memberPrisma = await database.member.create({
             data: {
@@ -30,6 +31,7 @@ const createMember = async (memberData: MemberInput): Promise<Member> => {
                 phoneNumber,
                 password,
                 ...(profile && { profile: { create: profile } }), // Creating a profile if passed
+                ...(membership && { membership: { create: membership } }), // Creating a membership if passed
                 payments: {
                     create: payment.map((p) => ({
                         amount: p.amount,
@@ -42,6 +44,7 @@ const createMember = async (memberData: MemberInput): Promise<Member> => {
             include: {
                 profile: true,
                 payments: true,
+                membership: true, // Correct to 'membership' (singular)
             },
         });
 
@@ -52,8 +55,6 @@ const createMember = async (memberData: MemberInput): Promise<Member> => {
     }
 };
 
-
-
 const getMemberById = async ({ id }: { id: number }): Promise<Member | null> => {
     try {
         const memberPrisma = await database.member.findUnique({
@@ -61,6 +62,7 @@ const getMemberById = async ({ id }: { id: number }): Promise<Member | null> => 
             include: {
                 profile: true,
                 payments: true,
+                membership: true, // Correct to 'membership' (singular)
             },
         });
 
@@ -73,7 +75,7 @@ const getMemberById = async ({ id }: { id: number }): Promise<Member | null> => 
 
 // Method to update a member's details
 const updateMember = async (id: number, memberData: MemberInput): Promise<Member> => {
-    const { username, email, phoneNumber, password, profile, payment } = memberData;
+    const { username, email, phoneNumber, password, profile, payment, membership } = memberData;
 
     try {
         // Update member in the database
@@ -84,9 +86,10 @@ const updateMember = async (id: number, memberData: MemberInput): Promise<Member
                 email,
                 phoneNumber,
                 password,
-                ...(profile && { profile: { update: profile } }),  // Update profile if passed
+                ...(profile && { profile: { update: profile } }), // Update profile if passed
+                membership: { update: membership }, // Always update membership
                 payments: {
-                    deleteMany: {},  // Optionally delete existing payments (if needed)
+                    deleteMany: {}, // Optionally delete existing payments (if needed)
                     create: payment.map((p) => ({
                         amount: p.amount,
                         date: p.date,
@@ -98,17 +101,14 @@ const updateMember = async (id: number, memberData: MemberInput): Promise<Member
             include: {
                 profile: true,
                 payments: true,
+                membership: true, // Include membership in the result
             },
         });
-
-        // Return the updated member as a domain model
         return Member.from(updatedMemberPrisma);
     } catch (error) {
-        console.error(error);
-        throw new Error('Database error. See server log for details.');
+        throw new Error(`Error updating member: ${error}`);
     }
 };
-
 
 export default {
     getAllMembers,

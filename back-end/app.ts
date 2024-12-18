@@ -6,6 +6,8 @@ import swaggerUi from 'swagger-ui-express';
 
 import { memberRouter } from './controller/member.routes';
 import {paymentRouter} from './controller/payment.routes';
+import {trainerRouter} from './controller/trainer.routes';
+
 const app = express();
 dotenv.config();
 const port = process.env.APP_PORT || 3001;
@@ -18,6 +20,7 @@ app.use(express.json());
 // Use the member router
 app.use("/members", memberRouter);
 app.use("/payments", paymentRouter);
+app.use("/trainers", trainerRouter);
 
 
 app.get('/status', (req, res) => {

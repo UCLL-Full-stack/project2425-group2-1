@@ -2,10 +2,12 @@ import {
     Member as MemberPrisma,
     Payment as PaymentPrisma,
     Profile as ProfilePrisma,
+    Membership as MembershipPrisma,
 } from '@prisma/client';
 
 import { Payment } from './payment';
 import { Profile } from './profile';
+import { Membership } from './membership';
 
 export class Member {
     public id?: number; // Optional id
@@ -14,8 +16,9 @@ export class Member {
     public phoneNumber: string;
     public password: string;
     public profile?: Profile;
-    public payment: Payment[]; // Use singular form
 
+    public payment: Payment[]; // Use singular form
+    public membership?: Membership;
     // Constructor to initialize the Member object
     constructor({
         id,
@@ -24,7 +27,9 @@ export class Member {
         phoneNumber,
         password,
         profile,
+
         payment = [],
+        membership,
     }: {
         id?: number;
         username: string;
@@ -32,7 +37,8 @@ export class Member {
         phoneNumber: string;
         password: string;
         profile: Profile;
-        payment?: Payment[]; // Use singular form
+        payment?: Payment[];
+        membership: Membership; // Use singular form
     }) {
         //   if (!this.validatePhoneNumber(phoneNumber)) {
         //       throw new Error("Invalid phone number format. It should start with +32 or 04 and have 10 digits.");
@@ -49,6 +55,7 @@ export class Member {
         this.password = password;
         this.profile = profile;
         this.payment = payment; // Initialize payment
+        this.membership = membership;
     }
 
     getId(): number | undefined {
@@ -79,6 +86,10 @@ export class Member {
         return this.profile;
     }
 
+    getMembership(): Membership | undefined {
+        return this.membership;
+    }
+
     addPayment(payment: Payment): void {
         this.payment.push(payment);
     }
@@ -95,15 +106,16 @@ export class Member {
         );
     }
 
-    // private validatePhoneNumber(phoneNumber: string): boolean {
-    //   const phoneRegex = /^(?:\+32|04)\d{8}$/;
-    //   return phoneRegex.test(phoneNumber);
-    // }
+    static validatePhoneNumber(phoneNumber: string): boolean {
+        const phoneRegex = /^(?:\+32|04)\d{8}$/;
+        return phoneRegex.test(phoneNumber);
+    }
 
-    // private validatePassword(password: string): boolean {
-    //   const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@#$%^&*!&+=])[A-Za-z\d@#$%^&*!&+=]{8,}$/;
-    //   return passwordRegex.test(password);
-    // }
+    static validatePassword(password: string): boolean {
+        const passwordRegex =
+            /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@#$%^&*!&+=])[A-Za-z\d@#$%^&*!&+=]{8,}$/;
+        return passwordRegex.test(password);
+    }
 
     // static from({
     //   id,
@@ -136,9 +148,16 @@ export class Member {
     //     });
     // }
 
-    public static from(memberPrisma: MemberPrisma & { profile: ProfilePrisma; payments: PaymentPrisma[] }): Member {
+    public static from(
+        memberPrisma: MemberPrisma & {
+            profile: ProfilePrisma;
+            payments: PaymentPrisma[];
+            membership: MembershipPrisma;
+        }
+    ): Member {
         // Map Profile and Payments to their respective classes
         const profileInstance = Profile.from(memberPrisma.profile);
+        const membershipInstance = Membership.from(memberPrisma.membership);
         const paymentsInstance = memberPrisma.payments.map((payment) => Payment.from(payment));
 
         return new Member({
@@ -148,7 +167,9 @@ export class Member {
             phoneNumber: memberPrisma.phoneNumber,
             password: memberPrisma.password,
             profile: profileInstance,
+
             payment: paymentsInstance,
+            membership: membershipInstance,
         });
     }
 }

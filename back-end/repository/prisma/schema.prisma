@@ -21,7 +21,18 @@ model Member {
   password     String
   profile      Profile     @relation(fields: [profileId], references: [id])
   profileId    Int         @unique
+  membership  Membership  @relation(fields : [membershipId], references: [id])
+  membershipId Int         @unique
   payments     Payment[]
+}
+
+//one to one relation
+model Membership {
+  id         Int      @id @default(autoincrement())
+  startDate  DateTime
+  endDate    DateTime
+  type       String   
+  member     Member?
 }
 
 model Profile {
@@ -41,4 +52,19 @@ model Payment {
   paymentStatus Boolean  @default(false)
   member        Member   @relation(fields: [memberId], references: [id])
   memberId      Int
+}
+
+
+model Attendance {
+  id         Int      @id @default(autoincrement())
+  attendance_tracking Boolean
+  trainer   Trainer[] @relation("TrainerAttendances")
+}
+
+model Trainer {
+  id         Int      @id @default(autoincrement())
+  name       String
+  availability  Boolean
+  language_spoken     String
+  attendances Attendance[] @relation("TrainerAttendances")
 }

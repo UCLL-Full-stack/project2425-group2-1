@@ -4,7 +4,7 @@ import { Profile } from '../../model/profile';
 import memberDb from '../../repository/member.db';
 import memberService from '../../service/member.service';
 import { MemberInput, ProfileInput } from '../../types';
-import { Member as MemberPrisma, Payment as PaymentPrisma, Profile as ProfilePrisma } from '@prisma/client'; // Correct Prisma imports
+import { Member as MemberPrisma, Payment as PaymentPrisma, Profile as ProfilePrisma, Membership as MembershipPrisma } from '@prisma/client'; // Correct Prisma imports
 
 
 // describe('Profile Tests', () => {
@@ -158,7 +158,7 @@ describe('Member.from', () => {
             memberId: 1,
         };
 
-        const memberPrisma: MemberPrisma & { profile: ProfilePrisma; payments: PaymentPrisma[] } = {
+        const memberPrisma: MemberPrisma & { profile: ProfilePrisma; payments: PaymentPrisma[]; membership : MembershipPrisma } = {
             id: 1,
             username: 'johndoe',
             email: 'john@example.com',
@@ -167,6 +167,13 @@ describe('Member.from', () => {
             profile: profilePrisma,
             payments: [paymentPrisma],
             profileId: 1,
+            membershipId: 1,
+            membership: {
+                id: 1,
+                type: 'Gold',
+                startDate: new Date('2023-01-01'),
+                endDate: new Date('2024-01-01')
+            }
         };
 
         const member = Member.from(memberPrisma);
@@ -193,3 +200,5 @@ describe('Member.from', () => {
         expect(payments[0].getPaymentStatus()).toBe(true);
     });
 });
+
+
