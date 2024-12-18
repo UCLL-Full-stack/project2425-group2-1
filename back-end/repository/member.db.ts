@@ -1,89 +1,118 @@
+import database from '../util/database';
 import { Member } from '../model/member';
 import { Profile } from '../model/profile';
-import { Payment } from '../model/payment'; // Import the Payment class
+import { Payment } from '../model/payment';
+import { MemberInput } from '../types';
 
-// Create an array to hold the members
-const members: Member[] = [
-    new Member({
-        id: 1,
-        username: "XxX_ibench225_XxX",
-        email: "randomahhemail@gmail.com",
-        phoneNumber: "0475829054",
-        password: "Password@1",
-        profile: new Profile({
-            id: 1,
-            name: "john",
-            surname: "smith",
-            height: 154,
-            weight: 50
-        }),
-        payment: [ // Initialize payments directly here
-            new Payment({ amount: 50, date: new Date('2024-01-15'), dueDate: new Date('2024-02-15'), paymentStatus: true }),
-            new Payment({ amount: 75, date: new Date('2024-02-10'), dueDate: new Date('2024-03-10'), paymentStatus: false }),
-        ]
-    }),
-    new Member({
-        id: 2,
-        username: "WifelessWarrior",
-        email: "idk@gmail.com",
-        phoneNumber: "0403892754",
-        password: "Secure@Password2",
-        profile: new Profile({
-            id: 2,
-            name: "bla",
-            surname: "smith",
-            height: 123,
-            weight: 60
-        }),
-        payment: [ // Initialize payments directly here
-            new Payment({ amount: 100, date: new Date('2024-03-20'), dueDate: new Date('2024-04-20'), paymentStatus: true }),
-        ]
-    }),
-];
-
-const getNextId = (): number => {
-    const ids = members.map(member => member.getId() || 0);
-    return ids.length > 0 ? Math.max(...ids) + 1 : 1;
-};
-
-const getAllMembers = (): Member[] => members;
-
-
-
-const isUsernameUnique = (username: string): boolean => {
-    return !members.some((member) => member.getUsername() === username);
-};
-
-const addMember = (newMember: Member): void => {
-    if (isUsernameUnique(newMember.getUsername())) {
-        newMember.setId(getNextId()); // Assign the next available ID
-        members.push(newMember);
-    } else {
-        throw new Error(`Username ${newMember.getUsername()} is already taken.`);
+const getAllMembers = async (): Promise<Member[]> => {
+    try {
+        const membersPrisma = await database.member.findMany({
+            include: {
+                profile: true,
+                payments: true,
+            },
+        });
+        return membersPrisma.map((memberPrisma) => Member.from(memberPrisma));
+    } catch (error) {
+        console.error(error);
+        throw new Error('Database error. See server log for details.');
     }
 };
 
-const getMemberById = ({ id }: { id: number }): Member | undefined => {
-  const member = members.find(member => member.getId() === id);
-  console.log(`getMemberById: Found member with ID ${id}:`, member); // Log the member for verification
-  return member;
+const createMember = async (memberData: MemberInput): Promise<Member> => {
+    const { username, email, phoneNumber, password, profile, payment } = memberData;
+    
+    try {
+        const memberPrisma = await database.member.create({
+            data: {
+                username,
+                email,
+                phoneNumber,
+                password,
+                ...(profile && { profile: { create: profile } }), // Creating a profile if passed
+                payments: {
+                    create: payment.map((p) => ({
+                        amount: p.amount,
+                        date: p.date,
+                        dueDate: p.dueDate,
+                        paymentStatus: p.paymentStatus,
+                    })),
+                },
+            },
+            include: {
+                profile: true,
+                payments: true,
+            },
+        });
+
+        return Member.from(memberPrisma);
+    } catch (error) {
+        console.error(error);
+        throw new Error('Database error. See server log for details.');
+    }
 };
 
-const updateMember = (updatedMember: Member): void => {
-  const index = members.findIndex(member => member.getId() === updatedMember.getId());
-  if (index !== -1) {
-    members[index] = updatedMember;
-    console.log(`updateMember: Updated member with ID ${updatedMember.getId()}`); // Log the update for verification
-  } else {
-    console.error(`updateMember: Member with ID ${updatedMember.getId()} not found`);
-  }
+
+
+const getMemberById = async ({ id }: { id: number }): Promise<Member | null> => {
+    try {
+        const memberPrisma = await database.member.findUnique({
+            where: { id },
+            include: {
+                profile: true,
+                payments: true,
+            },
+        });
+
+        return memberPrisma ? Member.from(memberPrisma) : null;
+    } catch (error) {
+        console.error(error);
+        throw new Error('Database error. See server log for details.');
+    }
 };
 
-// Exporting functions for use in other modules
+// Method to update a member's details
+const updateMember = async (id: number, memberData: MemberInput): Promise<Member> => {
+    const { username, email, phoneNumber, password, profile, payment } = memberData;
+
+    try {
+        // Update member in the database
+        const updatedMemberPrisma = await database.member.update({
+            where: { id },
+            data: {
+                username,
+                email,
+                phoneNumber,
+                password,
+                ...(profile && { profile: { update: profile } }),  // Update profile if passed
+                payments: {
+                    deleteMany: {},  // Optionally delete existing payments (if needed)
+                    create: payment.map((p) => ({
+                        amount: p.amount,
+                        date: p.date,
+                        dueDate: p.dueDate,
+                        paymentStatus: p.paymentStatus,
+                    })),
+                },
+            },
+            include: {
+                profile: true,
+                payments: true,
+            },
+        });
+
+        // Return the updated member as a domain model
+        return Member.from(updatedMemberPrisma);
+    } catch (error) {
+        console.error(error);
+        throw new Error('Database error. See server log for details.');
+    }
+};
+
+
 export default {
-    getMemberById,
-    isUsernameUnique,
-    addMember,
     getAllMembers,
+    createMember,
+    getMemberById,
     updateMember,
 };

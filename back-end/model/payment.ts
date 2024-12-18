@@ -1,17 +1,20 @@
+import { Payment as PaymentPrisma } from '@prisma/client';
 export class Payment {
-    private id?: number;                // Optional id
-    private amount: number;             // Amount paid
-    private date: Date;                 // Payment date
-    private dueDate: Date;              // Due date for the payment
-    private paymentStatus: boolean;      // Payment status (true if paid, false if pending)
+    public id?: number;                // Optional id
+    public amount: number;             // Amount paid
+    public date: Date;                 // Payment date
+    public dueDate: Date;              // Due date for the payment
+    public paymentStatus: boolean;      // Payment status (true if paid, false if pending)
 
     // Constructor to initialize the Payment object
     constructor(payment: { 
+        id?: number,
         amount: number, 
         date: Date, 
         dueDate: Date, 
-        paymentStatus: boolean 
+        paymentStatus: boolean,
     }) {
+        this.id = payment.id;
         this.amount = payment.amount;
         this.date = payment.date;
         this.dueDate = payment.dueDate;
@@ -23,6 +26,7 @@ export class Payment {
         return this.id;
     }
 
+   
     getAmount(): number {
         return this.amount;
     }
@@ -54,4 +58,19 @@ export class Payment {
             this.paymentStatus === payment.getPaymentStatus()
         );
     }
-}
+    static from({
+        id,
+        amount,
+        date,
+        dueDate,
+        paymentStatus,
+    }: PaymentPrisma): Payment {
+        return new Payment({
+            id,
+            amount,
+            date,
+            dueDate,
+            paymentStatus,
+        });
+    }
+};

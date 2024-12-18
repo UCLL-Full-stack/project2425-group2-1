@@ -1,54 +1,39 @@
-import { Member } from '../model/member';
-import { Payment } from '../model/payment';
-import memberRepository from '../repository/member.db';
+import paymentDB from '../repository/payment.db';  // Importing the payment database functions
+import { Payment } from '../model/payment';  // Importing the Payment model
+import { PaymentInput } from '../types';  // Importing the PaymentInput type
 
-// Function to get payment status for all members
-const getPaymentStatus = () => {
-    const members = memberRepository.getAllMembers(); // Fetch all members from the repository
-
-    return members.map(member => {
-        const payments = member.getPayments();
-        const totalPaid = payments.reduce((sum, payment) => sum + payment.getAmount(), 0);
-        const overdueCount = payments.filter(payment => isPaymentOverdue(payment)).length;
-        const paymentStatus = payments.some(payment => !payment.getPaymentStatus()) ? 'Pending' : 'Paid';
-
-        return { 
-            member: member.getUsername(), 
-            totalPaid, 
-            status: paymentStatus, 
-            overdueCount 
-        };
-    });
+// Service method to fetch all payments
+const getAllPayments = async (): Promise<Payment[]> => {
+    try {
+        return await paymentDB.getAllPayments();  // Call the getAllPayments function from paymentDB
+    } catch (error) {
+        console.error(error);
+        throw new Error('Error fetching all payments.');
+    }
 };
 
-// Function to generate a financial report
-const generateFinancialReport = ()=> {
-    const members = memberRepository.getAllMembers(); // Fetch all members from the repository
-
-    return members.map(member => {
-        const payments = member.getPayments();
-        const totalPaid = payments.reduce((sum, payment) => sum + payment.getAmount(), 0);
-        const totalPayments = payments.length;
-        const totalOverdue = payments.filter(payment => isPaymentOverdue(payment)).length;
-
-        return { 
-            member: member.getUsername(), 
-            totalPaid, 
-            totalPayments, 
-            totalOverdue 
-        };
-    });
+// Service method to fetch payments by member ID
+const getPaymentsByMemberId = async (memberId: number): Promise<Payment[]> => {
+    try {
+        return await paymentDB.getPaymentsByMemberId({ memberId });  // Call the getPaymentsByMemberId function from paymentDB
+    } catch (error) {
+        console.error(error);
+        throw new Error(`Error fetching payments for member with id ${memberId}.`);
+    }
 };
 
-// Private function to check if a payment is overdue
-const isPaymentOverdue = (payment: Payment): boolean => {
-    const currentDate = new Date();
-    const paymentDate = payment.getDueDate(); // Use due date for overdue check
-    return !payment.getPaymentStatus() && paymentDate < currentDate;
+// Service method to create a new payment
+const createPayment = async (paymentData: PaymentInput, memberId: number): Promise<Payment> => {
+    try {
+        return await paymentDB.createPayment(paymentData, memberId);  // Call the createPayment function from paymentDB
+    } catch (error) {
+        console.error(error);
+        throw new Error('Error creating new payment.');
+    }
 };
 
-// Exporting functions for use in other modules
 export default {
-    getPaymentStatus,
-    generateFinancialReport,
+    getAllPayments,
+    getPaymentsByMemberId,
+    createPayment,
 };

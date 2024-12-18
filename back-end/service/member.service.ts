@@ -1,78 +1,69 @@
-import { Member } from '../model/member';
-import { Profile } from '../model/profile';
-import memberRepository from '../repository/member.db';
+import memberDB from '../repository/member.db';  // Importing the member database functions
+import { Member } from '../model/member';  // Importing the Member model
+import { MemberInput } from '../types';
 
-// Assuming this function is part of a class; if it's standalone, remove 'this.'
-const registerMember = (newMember: Member): number => {
-    // Check if username is unique
-    if (!isUsernameUnique(newMember.getUsername())) {
-        throw new Error("Username is already taken. Please choose another.");
-    }
-
-    // Add the member to the repository
-    memberRepository.addMember(newMember);
-    console.log("Registration successful! Redirecting to dashboard...");
-    
-    // Return the new member's ID
-    return newMember.getId()!;
-};
-
-const isUsernameUnique = (username: string): boolean => {
-    return memberRepository.isUsernameUnique(username);
-};
-
-// Function to get all members
-const getAllMembers = (): Member[] => {
-    return memberRepository.getAllMembers();
-};
-
-// Function to get a member by ID
-const getMemberById = (id: number): Member => {
-    const member = memberRepository.getMemberById( {id} ); // Assuming id is already a number
-    if (!member) {
-        throw new Error(`Member with id ${id} does not exist.`);
-    }
-    return member;
-};
-
-const updateProfile = async (id: number, profileUpdates: { name?: string; surname?: string; height?: number; weight?: number; }): Promise<Member | null> => {
+// Service method to fetch all members
+const getAllMembers = async (): Promise<Member[]> => {
     try {
-      const member = memberRepository.getMemberById({ id }); // Retrieve the member by ID
-      if (!member) {
-        console.error(`Member with ID ${id} not found.`);
-        return null;
-      }
-  
-      const profile = member.getProfile();
-  
-      // Update the profile with the provided values
-      if (profileUpdates.name !== undefined) {
-        profile.setName(profileUpdates.name);
-      }
-      if (profileUpdates.surname !== undefined) {
-        profile.setSurname(profileUpdates.surname);
-      }
-      if (profileUpdates.height !== undefined) {
-        profile.setHeight(profileUpdates.height);
-      }
-      if (profileUpdates.weight !== undefined) {
-        profile.setWeight(profileUpdates.weight);
-      }
-  
-      // Persist the updated member in the repository
-      memberRepository.updateMember(member); // This updates the member in the array
-  
-      return member; // Return the updated member
+        return await memberDB.getAllMembers();  // Call the getAllMembers function from memberDB
     } catch (error) {
-      console.error('Error updating profile:', error);
-      throw error;
+        console.error(error);
+        throw new Error('Error fetching all members.');
     }
-  };
+};
 
-// Exporting functions for use in other modules
+// Service method to fetch a member by their ID
+const getMemberById = async (id: number): Promise<Member> => {
+    try {
+        const member = await memberDB.getMemberById({ id });  // Call the getMemberById function from memberDB
+        if (!member) {
+            throw new Error(`Member with id ${id} does not exist.`);  // Error if member not found
+        }
+        return member;
+    } catch (error) {
+        console.error(error);
+        throw new Error(`Error fetching member with id ${id}.`);
+    }
+};
+
+// Service method to create a new member
+const createMember = async (memberData: MemberInput): Promise<Member> => {
+    try {
+        return await memberDB.createMember(memberData);  // Call the createMember function from memberDB
+    } catch (error) {
+        console.error(error);
+        throw new Error('Error creating new member.');
+    }
+};
+const updateMember = async (id: number, memberData: MemberInput): Promise<Member> => {
+    const { username, email, phoneNumber, password, profile, payment } = memberData;
+
+    try {
+        // Assuming memberDB.updateMember handles updating the member data and returns the updated member
+        const updatedMember = await memberDB.updateMember(id, {
+            username,
+            email,
+            phoneNumber,
+            password,
+            profile,
+            payment,
+        });
+
+        if (!updatedMember) {
+            throw new Error(`Member with id ${id} could not be updated.`);  // Error if member update failed
+        }
+
+        return updatedMember;
+    } catch (error) {
+        console.error(error);
+        throw new Error(`Error updating member with id ${id}.`);
+    }
+};
+
+
 export default {
     getAllMembers,
-    registerMember,
     getMemberById,
-    updateProfile,
+    createMember,
+    updateMember,
 };
