@@ -1,6 +1,6 @@
 import express, { Request, Response } from 'express';
 import paymentService from '../service/payment.service'; // Adjust path as needed
-import { PaymentInput } from '../types'; // Ensure the correct path to types
+import { PaymentInput, AuthenticationResponse } from '../types'; // Ensure the correct path to types
 
 const paymentRouter = express.Router();
 

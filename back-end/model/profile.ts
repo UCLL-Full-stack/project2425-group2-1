@@ -1,14 +1,14 @@
 import {Profile as ProfilePrisma} from '@prisma/client';
 export class Profile {
     public id?: number;
-    public name: string;
+    public firstname: string;
     public surname: string;
     public height: number; // height in cm
     public weight: number; // weight in kg
 
-    constructor(profile: { id?: number; name: string; surname: string; height: number; weight: number }) {
+    constructor(profile: { id?: number; firstname: string; surname: string; height: number; weight: number }) {
         this.id = profile.id;
-        this.name = profile.name;
+        this.firstname = profile.firstname;
         this.surname = profile.surname;
         this.height = profile.height;
         this.weight = profile.weight;
@@ -18,8 +18,8 @@ export class Profile {
         return this.id;
     }
 
-    getName(): string {
-        return this.name;
+    getFirstName(): string {
+        return this.firstname;
     }
 
     getSurname(): string {
@@ -34,8 +34,8 @@ export class Profile {
         return this.weight;
     }
 
-    setName(name: string): void {
-        this.name = name;
+    setFirstName(firstname: string): void {
+        this.firstname = firstname;
     }
 
     setSurname(surname: string): void {
@@ -52,7 +52,7 @@ export class Profile {
     
     equals(profile: Profile): boolean {
         return (
-            this.name === profile.getName() &&
+            this.firstname === profile.getFirstName() &&
             this.surname === profile.getSurname() &&
             this.height === profile.getHeight() &&
             this.weight === profile.getWeight()
@@ -60,14 +60,14 @@ export class Profile {
     }
     static from({
         id,
-        name,
+        firstname,
         surname,
         height,
         weight,
     }: ProfilePrisma): Profile {
         return new Profile({
             id,
-            name,
+            firstname,
             surname,
             height,
             weight,

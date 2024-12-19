@@ -24,19 +24,21 @@ model Member {
   membershipId Int         @unique
   payments     Payment[]
   attendance   Attendance[]  @relation("MemberAttendances")
+  role         String        @default("member")
 }
+
 
 model Membership {
   id         Int      @id @default(autoincrement())
-  startDate  DateTime
-  endDate    DateTime
+  startDate  DateTime  
+  endDate    DateTime  
   type       String
   member     Member?
 }
 
 model Profile {
   id       Int     @id @default(autoincrement())
-  name     String
+  firstname     String
   surname  String
   height   Float
   weight   Float
@@ -55,7 +57,8 @@ model Payment {
 
 model Trainer {
   id              Int      @id @default(autoincrement())
-  name            String
+  name            String   @unique
+  password        String
   availability    Boolean
   language_spoken String
   attendances     Attendance[] @relation("TrainerAttendances")
@@ -69,3 +72,4 @@ model Attendance {
   memberId             Int
   member               Member   @relation("MemberAttendances", fields: [memberId], references: [id])
 }
+

@@ -1,9 +1,18 @@
-import express, { Request, Response } from 'express';
+import express, { NextFunction, Request, Response } from 'express';
 import trainerService from '../service/trainer.service'; // Adjust path as needed
 import { TrainerInput } from '../types'; // Ensure the correct path to types
 
 const trainerRouter = express.Router();
 
+trainerRouter.post('/login', async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        const trainerInput = <TrainerInput>req.body;  // Get input data from the request body
+        const response = await trainerService.trainerAuthentication(trainerInput);  // Call the authentication service
+        res.status(200).json({ message: "Authentication Successful", ...response });
+    } catch (error) {
+        next(error);
+    }
+});
 // Get all trainers
 trainerRouter.get('/', async (req: Request, res: Response) => {
     try {

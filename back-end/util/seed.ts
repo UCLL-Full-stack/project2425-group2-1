@@ -1,6 +1,7 @@
 import { PrismaClient } from '@prisma/client';
 import { set } from 'date-fns';
 import { Attendance } from '../model/attendance';
+import bcrypt from 'bcrypt';
 
 const prisma = new PrismaClient();
 
@@ -10,12 +11,12 @@ const main = async () => {
     await prisma.profile.deleteMany();
     await prisma.trainer.deleteMany();
     await prisma.attendance.deleteMany();
-    await prisma.membership.deleteMany(); 
+    await prisma.membership.deleteMany();
 
     // 1. Create Profiles first
     const profile1 = await prisma.profile.create({
         data: {
-            name: 'John',
+            firstname: 'John',
             surname: 'Smith',
             height: 154,
             weight: 50,
@@ -24,7 +25,7 @@ const main = async () => {
 
     const profile2 = await prisma.profile.create({
         data: {
-            name: 'Bla',
+            firstname: 'Bla',
             surname: 'Smith',
             height: 123,
             weight: 60,
@@ -48,13 +49,17 @@ const main = async () => {
         },
     });
 
+    const hashedPassword1 = await bcrypt.hash('Password@1', 13);
+    const hashedPassword2 = await bcrypt.hash('Secure@Password2', 13);
+
     // 2. Create Members and connect to the previously created Profiles
     const member1 = await prisma.member.create({
         data: {
             username: 'XxX_ibench225_XxX',
             email: 'randomahhemail@gmail.com',
             phoneNumber: '0475829054',
-            password: 'Password@1',
+            role : "member",
+            password: hashedPassword1,
             profile: { connect: { id: profile1.id } }, // Connect the created profile to member1
             membership: { connect: { id: membership1.id } }, // Connect the created membership to member1
         },
@@ -65,7 +70,8 @@ const main = async () => {
             username: 'WifelessWarrior',
             email: 'idk@gmail.com',
             phoneNumber: '0403892754',
-            password: 'Secure@Password2',
+            role : 'member',
+            password: hashedPassword2,
             profile: { connect: { id: profile2.id } }, // Connect the created profile to member2
             membership: { connect: { id: membership2.id } }, // Connect the created membership to member2
         },
@@ -104,17 +110,21 @@ const main = async () => {
 
     // 5. Create Trainers
     // Create Trainers
+    const hashedTrainerPassword1 = await bcrypt.hash('H4e2y1@password', 13);
     const trainer1 = await prisma.trainer.create({
         data: {
             name: 'Jane Doe',
+            password: hashedTrainerPassword1,
             availability: true,
             language_spoken: 'English, Dutch',
         },
     });
 
+    const hashedTrainerPassword2 = await bcrypt.hash('Secure@Password231', 13);
     const trainer2 = await prisma.trainer.create({
         data: {
             name: 'John Smith',
+            password: hashedTrainerPassword2,
             availability: false,
             language_spoken: 'French, English',
         },
@@ -128,19 +138,19 @@ const main = async () => {
             },
             member: {
                 connect: { id: member1.id },
+            },
         },
-    }
-});
+    });
 
     const attendance2 = await prisma.attendance.create({
         data: {
             attendance_tracking: false,
             trainer: {
-                connect:{ id: trainer2.id },
+                connect: { id: trainer2.id },
             },
-            member:{
+            member: {
                 connect: { id: member2.id },
-            }
+            },
         },
     });
 

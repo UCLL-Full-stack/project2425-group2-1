@@ -17,12 +17,13 @@ const getAllTrainers = async (): Promise<Trainer[]> => {
 };
 
 const createTrainer = async (trainerData: TrainerInput): Promise<Trainer> => {
-    const { name, language_spoken, availability } = trainerData;
+    const { name, language_spoken, password, availability } = trainerData;
 
     try {
         const trainerPrisma = await database.trainer.create({
             data: {
                 name,
+                password,
                 language_spoken,
                 availability,
             },
@@ -70,9 +71,25 @@ const getTrainerById = async (id: number): Promise<Trainer | null> => {
     }
 };
 
+const getTrainerByUsername = async ({ name }: { name: string }): Promise<Trainer | null> => {
+    try {
+        const trainerPrisma = await database.trainer.findUnique({
+            where: { name },
+            include: {
+                attendances: true, // Optionally include attendance data if needed
+            },
+        });
+        return trainerPrisma ? Trainer.from(trainerPrisma) : null;
+    } catch (error) {
+        console.error(error);
+        throw new Error('Database error. See server log for details.');
+    }
+};
+
 export default {
     getAllTrainers,
     createTrainer,
     getTrainersByAvailability,
     getTrainerById,
+    getTrainerByUsername,
 };

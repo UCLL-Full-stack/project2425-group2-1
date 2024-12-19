@@ -5,6 +5,26 @@ import { Payment } from '../model/payment';
 import { Membership } from '../model/membership';
 import { Attendance } from '../model/attendance';
 import { MemberInput } from '../types';
+import bcrypt from 'bcrypt';
+
+const getUserByUsername = async ({ username }: { username: string }): Promise<Member | null> => {
+    try {
+        const memberPrisma = await database.member.findUnique({
+            where: { username },
+            include: {
+                profile: true,
+                payments: true,
+                membership: true,
+                attendance: true, // Include attendance in the result
+            },
+        });
+
+        return memberPrisma ? Member.from(memberPrisma) : null;
+    } catch (error) {
+        console.error(error);
+        throw new Error('Database error. See server log for details.');
+    }
+};
 
 // Get all members with related data
 const getAllMembers = async (): Promise<Member[]> => {
@@ -26,8 +46,17 @@ const getAllMembers = async (): Promise<Member[]> => {
 
 // Create a new member with related data
 const createMember = async (memberData: MemberInput): Promise<Member> => {
-    const { username, email, phoneNumber, password, profile, payment, membership, attendance } =
-        memberData;
+    const {
+        username,
+        email,
+        phoneNumber,
+        password,
+        role,
+        profile,
+        payment,
+        membership,
+        attendance,
+    } = memberData;
 
     try {
         const memberPrisma = await database.member.create({
@@ -36,6 +65,7 @@ const createMember = async (memberData: MemberInput): Promise<Member> => {
                 email,
                 phoneNumber,
                 password,
+                role,
                 ...(profile && { profile: { create: profile } }), // Create profile
                 ...(membership && { membership: { create: membership } }), // Create membership
                 payments: {
@@ -92,8 +122,17 @@ const getMemberById = async ({ id }: { id: number }): Promise<Member | null> => 
 
 // Update a member's details
 const updateMember = async (id: number, memberData: MemberInput): Promise<Member> => {
-    const { username, email, phoneNumber, password, profile, payment, membership, attendance } =
-        memberData;
+    const {
+        username,
+        email,
+        phoneNumber,
+        password,
+        role,
+        profile,
+        payment,
+        membership,
+        attendance,
+    } = memberData;
 
     // Default `attendance` to an empty array if not provided
     const attendanceData = attendance || [];
@@ -106,6 +145,7 @@ const updateMember = async (id: number, memberData: MemberInput): Promise<Member
                 email,
                 phoneNumber,
                 password,
+                role,
                 ...(profile && { profile: { update: profile } }), // Update profile if passed
                 membership: { update: membership }, // Always update membership
                 payments: {
@@ -145,13 +185,10 @@ const updateMember = async (id: number, memberData: MemberInput): Promise<Member
     }
 };
 
-
-
-
-
 export default {
     getAllMembers,
     createMember,
     getMemberById,
     updateMember,
+    getUserByUsername,
 };

@@ -6,6 +6,7 @@ type MemberInput = {
     email: string;
     phoneNumber: string;
     password: string;
+    role: Role; // MChanged
     profile: ProfileInput; // Linking to ProfileInput
     membership: MembershipInput; // Linking to MembershipInput
     payment: PaymentInput[]; // Linking to PaymentInput
@@ -18,7 +19,7 @@ type MembershipInput = {
     type: string;
 };
 type ProfileInput = {
-    name: string;
+    firstname: string;
     surname: string;
     height: number;
     weight: number;
@@ -31,7 +32,7 @@ type PaymentInput = {
 };
 
 type AttendanceInput = {
-    id : number;
+    id: number;
     attendance_tracking: boolean;
     trainerId: number;
 };
@@ -39,9 +40,24 @@ type AttendanceInput = {
 type TrainerInput = {
     name: string;
     language_spoken: string;
+    password: string;
     availability: boolean;
     attendances: AttendanceInput[]; // Linking to AttendanceInput
-    
 };
 
-export { MemberInput, ProfileInput, PaymentInput, MembershipInput, AttendanceInput, TrainerInput };
+type AuthenticationResponse = {
+    token: string;
+    username: string;
+    fullname: string;
+};
+
+export {
+    MemberInput,
+    ProfileInput,
+    PaymentInput,
+    MembershipInput,
+    AttendanceInput,
+    TrainerInput,
+    AuthenticationResponse,
+    Role,
+};
