@@ -124,17 +124,23 @@ const main = async () => {
         data: {
             attendance_tracking: true,
             trainer: {
-                connect: [{ id: trainer1.id }, { id: trainer2.id }],
+                connect: { id: trainer1.id },
             },
+            member: {
+                connect: { id: member1.id },
         },
-    });
+    }
+});
 
     const attendance2 = await prisma.attendance.create({
         data: {
             attendance_tracking: false,
             trainer: {
-                connect: [{ id: trainer1.id }],
+                connect:{ id: trainer2.id },
             },
+            member:{
+                connect: { id: member2.id },
+            }
         },
     });
 

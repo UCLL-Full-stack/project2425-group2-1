@@ -72,6 +72,9 @@ const updateMember = async (id: number, memberData: MemberInput): Promise<Member
     }
 };
 
+
+
+
 export default {
     getAllMembers,
     getMemberById,

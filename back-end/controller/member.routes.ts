@@ -58,6 +58,4 @@ memberRouter.put('/:id', async (req: Request, res: Response) => {
     }
 });
 
-
-
 export { memberRouter };

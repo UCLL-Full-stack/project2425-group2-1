@@ -42,4 +42,6 @@ paymentRouter.get('/member/:memberId', async (req: Request, res: Response) => {
     }
 });
 
+
+
 export { paymentRouter };

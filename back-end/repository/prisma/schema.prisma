@@ -12,7 +12,6 @@ datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
 }
-
 model Member {
   id           Int         @id @default(autoincrement())
   username     String      @unique
@@ -21,17 +20,17 @@ model Member {
   password     String
   profile      Profile     @relation(fields: [profileId], references: [id])
   profileId    Int         @unique
-  membership  Membership  @relation(fields : [membershipId], references: [id])
+  membership   Membership  @relation(fields: [membershipId], references: [id])
   membershipId Int         @unique
   payments     Payment[]
+  attendance   Attendance[]  @relation("MemberAttendances")
 }
 
-//one to one relation
 model Membership {
   id         Int      @id @default(autoincrement())
   startDate  DateTime
   endDate    DateTime
-  type       String   
+  type       String
   member     Member?
 }
 
@@ -54,17 +53,19 @@ model Payment {
   memberId      Int
 }
 
-
-model Attendance {
-  id         Int      @id @default(autoincrement())
-  attendance_tracking Boolean
-  trainer   Trainer[] @relation("TrainerAttendances")
+model Trainer {
+  id              Int      @id @default(autoincrement())
+  name            String
+  availability    Boolean
+  language_spoken String
+  attendances     Attendance[] @relation("TrainerAttendances")
 }
 
-model Trainer {
-  id         Int      @id @default(autoincrement())
-  name       String
-  availability  Boolean
-  language_spoken     String
-  attendances Attendance[] @relation("TrainerAttendances")
+model Attendance {
+  id                   Int      @id @default(autoincrement())
+  attendance_tracking  Boolean
+  trainerId            Int
+  trainer              Trainer  @relation("TrainerAttendances", fields: [trainerId], references: [id])
+  memberId             Int
+  member               Member   @relation("MemberAttendances", fields: [memberId], references: [id])
 }

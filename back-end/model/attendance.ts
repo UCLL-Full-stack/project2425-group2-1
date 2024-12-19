@@ -1,37 +1,29 @@
-import { Attendance as AttendancePrisma,
-    Trainer as TrainerPrisma
- } from '@prisma/client';
-import { Member } from './member';
-import { Trainer } from './trainer';
+import { Attendance as AttendancePrisma } from '@prisma/client';
 
 export class Attendance {
     public id?: number;
     public attendance_tracking: boolean;
-    public trainers?: Trainer[];
+    public trainerId: number; // Link to the trainer
 
     constructor({
         id,
         attendance_tracking,
-        trainers,
+        trainerId,
     }: {
         id?: number;
         attendance_tracking: boolean;
-        trainers?: Trainer[];
+        trainerId: number;
     }) {
         this.id = id;
         this.attendance_tracking = attendance_tracking;
-        this.trainers = trainers;
+        this.trainerId = trainerId;
     }
 
-    static from({
-        id,
-        attendance_tracking,
-        trainers,
-    }: AttendancePrisma & { trainers?: TrainerPrisma[] }): Attendance {
+    static from(attendancePrisma: AttendancePrisma): Attendance {
         return new Attendance({
-            id,
-            attendance_tracking,
-            trainers: trainers?.map((trainer) => Trainer.from(trainer)), // Map trainers
+            id: attendancePrisma.id,
+            attendance_tracking: attendancePrisma.attendance_tracking,
+            trainerId: attendancePrisma.trainerId,
         });
     }
 }

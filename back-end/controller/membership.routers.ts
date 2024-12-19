@@ -2,10 +2,10 @@ import express, { Request, Response } from 'express';
 import membershipService from '../service/membership.service'; // Ensure the correct path to services
 import { MembershipInput } from '../types'; // Ensure the correct path to types
 
-const membershiphRouter = express.Router();
+const membershipRouter = express.Router();
 
 // Get all memberships
-membershiphRouter.get('/', async (req: Request, res: Response) => {
+membershipRouter.get('/', async (req: Request, res: Response) => {
     try {
         const memberships = await membershipService.getAllMemberships();
         res.json(memberships);
@@ -16,7 +16,7 @@ membershiphRouter.get('/', async (req: Request, res: Response) => {
 });
 
 // Get a membership by ID
-membershiphRouter.get('/:id', async (req: Request, res: Response) => {
+membershipRouter.get('/:id', async (req: Request, res: Response) => {
     const membershipId = parseInt(req.params.id);
 
     try {
@@ -33,7 +33,7 @@ membershiphRouter.get('/:id', async (req: Request, res: Response) => {
 });
 
 // Create a new membership
-membershiphRouter.post('/', async (req: Request, res: Response) => {
+membershipRouter.post('/', async (req: Request, res: Response) => {
     const membershipData: MembershipInput = req.body;
 
     try {
@@ -46,7 +46,7 @@ membershiphRouter.post('/', async (req: Request, res: Response) => {
 });
 
 // Update a membership
-membershiphRouter.put('/:id', async (req: Request, res: Response) => {
+membershipRouter.put('/:id', async (req: Request, res: Response) => {
     const membershipId = parseInt(req.params.id);
     const membershipData: MembershipInput = req.body;
 
@@ -59,4 +59,20 @@ membershiphRouter.put('/:id', async (req: Request, res: Response) => {
     }
 });
 
-export { membershiphRouter };
+membershipRouter.post('/renew/:id', async (req: Request, res: Response) => {
+    const membershipId = parseInt(req.params.id);
+
+    try {
+        const renewedMembership = await membershipService.renewMembership(membershipId);
+        if (renewedMembership) {
+            res.json(renewedMembership);
+        } else {
+            res.status(404).json({ error: 'Membership not found.' });
+        }
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: 'Database error. See server log for details.' });
+    }
+});
+
+export { membershipRouter };

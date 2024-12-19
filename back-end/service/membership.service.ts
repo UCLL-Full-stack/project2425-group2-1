@@ -50,9 +50,25 @@ const updateMembership = async (id: number, membershipData: MembershipInput): Pr
     }
 };
 
+
+// Service method to renew a membership
+const renewMembership = async (id: number): Promise<Membership> => {
+    try {
+        const renewedMembership = await membershipDB.renewMembership(id); // Call the renewMembership function from membershipDB
+        if (!renewedMembership) {
+            throw new Error(`Membership with id ${id} could not be renewed.`); // Error if renewal fails
+        }
+        return renewedMembership;
+    } catch (error) {
+        console.error(error);
+        throw new Error(`Error renewing membership with id ${id}.`);
+    }
+};
+
 export default {
     getAllMemberships,
     getMembershipById,
     createMembership,
     updateMembership,
+    renewMembership,
 };

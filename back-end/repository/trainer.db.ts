@@ -4,7 +4,11 @@ import { TrainerInput } from '../types';
 
 const getAllTrainers = async (): Promise<Trainer[]> => {
     try {
-        const trainersPrisma = await database.trainer.findMany();
+        const trainersPrisma = await database.trainer.findMany({
+            include: {
+                attendances: true, // Include related attendances
+            },
+        });
         return trainersPrisma.map((trainerPrisma) => Trainer.from(trainerPrisma));
     } catch (error) {
         console.error(error);
@@ -22,6 +26,9 @@ const createTrainer = async (trainerData: TrainerInput): Promise<Trainer> => {
                 language_spoken,
                 availability,
             },
+            include: {
+                attendances: true, // Include attendances after creation if needed
+            },
         });
 
         return Trainer.from(trainerPrisma);
@@ -35,6 +42,9 @@ const getTrainersByAvailability = async (availability: boolean): Promise<Trainer
     try {
         const trainersPrisma = await database.trainer.findMany({
             where: { availability },
+            include: {
+                attendances: true, // Include attendances based on availability
+            },
         });
 
         return trainersPrisma.map((trainerPrisma) => Trainer.from(trainerPrisma));
@@ -48,6 +58,9 @@ const getTrainerById = async (id: number): Promise<Trainer | null> => {
     try {
         const trainerPrisma = await database.trainer.findUnique({
             where: { id },
+            include: {
+                attendances: true, // Include attendances for a single trainer
+            },
         });
         if (!trainerPrisma) return null;
         return Trainer.from(trainerPrisma);

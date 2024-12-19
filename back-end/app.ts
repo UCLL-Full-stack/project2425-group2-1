@@ -7,7 +7,7 @@ import swaggerUi from 'swagger-ui-express';
 import { memberRouter } from './controller/member.routes';
 import {paymentRouter} from './controller/payment.routes';
 import {trainerRouter} from './controller/trainer.routes';
-import { membershiphRouter } from './controller/membership.routers';
+import { membershipRouter } from './controller/membership.routers';
 
 const app = express();
 dotenv.config();
@@ -22,7 +22,7 @@ app.use(express.json());
 app.use("/members", memberRouter);
 app.use("/payments", paymentRouter);
 app.use("/trainers", trainerRouter);
-app.use("/memberships", membershiphRouter);
+app.use("/memberships", membershipRouter);
 
 
 app.get('/status', (req, res) => {

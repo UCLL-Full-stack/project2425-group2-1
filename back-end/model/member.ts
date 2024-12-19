@@ -3,11 +3,13 @@ import {
     Payment as PaymentPrisma,
     Profile as ProfilePrisma,
     Membership as MembershipPrisma,
+    Attendance as AttendancePrisma,
 } from '@prisma/client';
 
 import { Payment } from './payment';
 import { Profile } from './profile';
 import { Membership } from './membership';
+import { Attendance } from './attendance';
 
 export class Member {
     public id?: number; // Optional id
@@ -20,6 +22,7 @@ export class Member {
     public payment: Payment[]; // Use singular form
     public membership?: Membership;
     // Constructor to initialize the Member object
+    public attendance?: Attendance[];
     constructor({
         id,
         username,
@@ -27,9 +30,9 @@ export class Member {
         phoneNumber,
         password,
         profile,
-
         payment = [],
         membership,
+        attendance = [],
     }: {
         id?: number;
         username: string;
@@ -39,6 +42,7 @@ export class Member {
         profile: Profile;
         payment?: Payment[];
         membership: Membership; // Use singular form
+        attendance?: Attendance[];
     }) {
         //   if (!this.validatePhoneNumber(phoneNumber)) {
         //       throw new Error("Invalid phone number format. It should start with +32 or 04 and have 10 digits.");
@@ -56,6 +60,7 @@ export class Member {
         this.profile = profile;
         this.payment = payment; // Initialize payment
         this.membership = membership;
+        this.attendance = attendance;
     }
 
     getId(): number | undefined {
@@ -96,6 +101,10 @@ export class Member {
 
     getPayments(): Payment[] {
         return this.payment;
+    }
+
+    getAttendance(): Attendance[] {
+        return this.attendance || [];
     }
 
     equals(member: Member): boolean {
@@ -153,12 +162,14 @@ export class Member {
             profile: ProfilePrisma;
             payments: PaymentPrisma[];
             membership: MembershipPrisma;
+            attendance: AttendancePrisma[];
         }
     ): Member {
         // Map Profile and Payments to their respective classes
         const profileInstance = Profile.from(memberPrisma.profile);
         const membershipInstance = Membership.from(memberPrisma.membership);
         const paymentsInstance = memberPrisma.payments.map((payment) => Payment.from(payment));
+        const attendanceInstance = memberPrisma.attendance.map((attendance) => Attendance.from(attendance));
 
         return new Member({
             id: memberPrisma.id,
@@ -167,9 +178,9 @@ export class Member {
             phoneNumber: memberPrisma.phoneNumber,
             password: memberPrisma.password,
             profile: profileInstance,
-
             payment: paymentsInstance,
             membership: membershipInstance,
+            attendance: attendanceInstance,
         });
     }
 }

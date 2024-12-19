@@ -9,6 +9,7 @@ type MemberInput = {
     profile: ProfileInput; // Linking to ProfileInput
     membership: MembershipInput; // Linking to MembershipInput
     payment: PaymentInput[]; // Linking to PaymentInput
+    attendance?: AttendanceInput[]; // Linking to AttendanceInput
 };
 
 type MembershipInput = {
@@ -30,14 +31,17 @@ type PaymentInput = {
 };
 
 type AttendanceInput = {
+    id : number;
     attendance_tracking: boolean;
-    trainers: TrainerInput[];
+    trainerId: number;
 };
 
 type TrainerInput = {
     name: string;
     language_spoken: string;
     availability: boolean;
+    attendances: AttendanceInput[]; // Linking to AttendanceInput
+    
 };
 
 export { MemberInput, ProfileInput, PaymentInput, MembershipInput, AttendanceInput, TrainerInput };

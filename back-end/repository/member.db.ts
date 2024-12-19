@@ -2,15 +2,19 @@ import database from '../util/database';
 import { Member } from '../model/member';
 import { Profile } from '../model/profile';
 import { Payment } from '../model/payment';
+import { Membership } from '../model/membership';
+import { Attendance } from '../model/attendance';
 import { MemberInput } from '../types';
 
+// Get all members with related data
 const getAllMembers = async (): Promise<Member[]> => {
     try {
         const membersPrisma = await database.member.findMany({
             include: {
                 profile: true,
                 payments: true,
-                membership: true, // Correct to 'membership' (singular)
+                membership: true, // Corrected to 'membership' (singular)
+                attendance: true, // Include attendance
             },
         });
         return membersPrisma.map((memberPrisma) => Member.from(memberPrisma));
@@ -20,8 +24,10 @@ const getAllMembers = async (): Promise<Member[]> => {
     }
 };
 
+// Create a new member with related data
 const createMember = async (memberData: MemberInput): Promise<Member> => {
-    const { username, email, phoneNumber, password, profile, payment, membership } = memberData;
+    const { username, email, phoneNumber, password, profile, payment, membership, attendance } =
+        memberData;
 
     try {
         const memberPrisma = await database.member.create({
@@ -30,8 +36,8 @@ const createMember = async (memberData: MemberInput): Promise<Member> => {
                 email,
                 phoneNumber,
                 password,
-                ...(profile && { profile: { create: profile } }), // Creating a profile if passed
-                ...(membership && { membership: { create: membership } }), // Creating a membership if passed
+                ...(profile && { profile: { create: profile } }), // Create profile
+                ...(membership && { membership: { create: membership } }), // Create membership
                 payments: {
                     create: payment.map((p) => ({
                         amount: p.amount,
@@ -40,11 +46,20 @@ const createMember = async (memberData: MemberInput): Promise<Member> => {
                         paymentStatus: p.paymentStatus,
                     })),
                 },
+                attendance: attendance
+                    ? {
+                          create: attendance.map((a) => ({
+                              attendance_tracking: a.attendance_tracking,
+                              trainerId: a.trainerId,
+                          })),
+                      }
+                    : undefined, // Optionally create attendance if provided
             },
             include: {
                 profile: true,
                 payments: true,
-                membership: true, // Correct to 'membership' (singular)
+                membership: true,
+                attendance: true, // Include attendance in the result
             },
         });
 
@@ -55,6 +70,7 @@ const createMember = async (memberData: MemberInput): Promise<Member> => {
     }
 };
 
+// Get a member by ID with related data
 const getMemberById = async ({ id }: { id: number }): Promise<Member | null> => {
     try {
         const memberPrisma = await database.member.findUnique({
@@ -62,7 +78,8 @@ const getMemberById = async ({ id }: { id: number }): Promise<Member | null> => 
             include: {
                 profile: true,
                 payments: true,
-                membership: true, // Correct to 'membership' (singular)
+                membership: true,
+                attendance: true, // Include attendance in the result
             },
         });
 
@@ -73,12 +90,15 @@ const getMemberById = async ({ id }: { id: number }): Promise<Member | null> => 
     }
 };
 
-// Method to update a member's details
+// Update a member's details
 const updateMember = async (id: number, memberData: MemberInput): Promise<Member> => {
-    const { username, email, phoneNumber, password, profile, payment, membership } = memberData;
+    const { username, email, phoneNumber, password, profile, payment, membership, attendance } =
+        memberData;
+
+    // Default `attendance` to an empty array if not provided
+    const attendanceData = attendance || [];
 
     try {
-        // Update member in the database
         const updatedMemberPrisma = await database.member.update({
             where: { id },
             data: {
@@ -97,18 +117,37 @@ const updateMember = async (id: number, memberData: MemberInput): Promise<Member
                         paymentStatus: p.paymentStatus,
                     })),
                 },
+                attendance:
+                    attendanceData.length > 0 // Check if there is any attendance data
+                        ? {
+                              update: attendanceData.map((a) => ({
+                                  where: { id: a.id }, // Ensure attendance has an 'id' field
+                                  data: {
+                                      attendance_tracking: a.attendance_tracking,
+                                      trainerId: a.trainerId,
+                                  },
+                              })),
+                          }
+                        : undefined, // Update attendance if provided
             },
             include: {
                 profile: true,
                 payments: true,
-                membership: true, // Include membership in the result
+                membership: true,
+                attendance: true, // Include attendance in the result
             },
         });
+
         return Member.from(updatedMemberPrisma);
     } catch (error) {
+        console.error(error);
         throw new Error(`Error updating member: ${error}`);
     }
 };
+
+
+
+
 
 export default {
     getAllMembers,
